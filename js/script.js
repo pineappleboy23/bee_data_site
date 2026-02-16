@@ -2,32 +2,11 @@
 async function loadData() {
     // map data source
     // https://github.com/topojson/us-atlas?tab=readme-ov-file
-    const beeData = await d3.csv('https://raw.githubusercontent.com/pineappleboy23/DS_data/refs/heads/main/merged_df.csv');
+    // Using locally processed data from automated pipeline
+    const beeData = await d3.csv('data/processed/bee_data.csv');
 
-    // names of column to delete
-    const unneededColumns = ["table_x", "table_y", "Month"];
-
-    // Date column to date
-    beeData.forEach(d => {
-        if (d["Date"]) {
-            d.date = d["Date"];
-            delete d["Date"];
-        }
-        // replace spaces with underscores
-        for (let key in d) {
-            const newKey = key.replace(/ /g, "_"); // replace spaces with underscores
-            if (newKey !== key) {
-                d[newKey] = d[key];
-                delete d[key];
-            }
-
-            // remove unwanted columns
-            if (unneededColumns.includes(newKey)) {
-                delete d[newKey];
-            }
-        }
-    });
-
+    // All data processing is now done in the backend pipeline
+    // CSV columns are already properly formatted with underscores
     const mapData = await d3.json('js/data/us-states.json');
 
     return { beeData, mapData };
