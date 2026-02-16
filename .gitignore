@@ -27,3 +27,6 @@ data/raw/**/
 # If files get too large, uncomment below:
 # data/processed/*.csv
 # data/processed/*.json
+
+# VS Code tasks
+.vscode/tasks.json
