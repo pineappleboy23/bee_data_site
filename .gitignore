@@ -19,8 +19,9 @@ ENV/
 .venv
 
 # Data Pipeline
-data/raw/*.csv
-data/raw/*.json
+data/raw/**/*.csv
+data/raw/**/*.json
+data/raw/**/
 !data/raw/.gitkeep
 # Keep processed data in git for website deployment
 # If files get too large, uncomment below:
