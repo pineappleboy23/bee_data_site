@@ -184,16 +184,7 @@ function addFittedSVGs() {
         .append("line");
 
     //--------------------
-    // add selectors
-
-    // new line for selectors
-    contentDiv.append("br");
-
-    // Append the button at the end of the content div
-    contentDiv.append("button")
-        .attr("id", "clear-button")
-        .text("Clear Selected States");
-
+    // initialize selectors with existing markup
     addDropDownBox();
 }
 
@@ -215,23 +206,16 @@ function addDropDownBox() {
         //Percent_renovated: 'Percent Renovated %'
     }
 
-    // create drop down
-    const dropDown = d3.select("#content")
-        .append("select")
-        .attr("name", "select name")
-        .attr("id", "data-select")
-        // add functionality to change data used by graph and map
-        .on("change", (d) => {
-            // when new option selected change data type
-            let value = d3.select("#data-select").property("value");
+    // hydrate existing drop down in the control bar
+    const dropDown = d3.select("#data-select")
+        .on("change", () => {
+            const value = dropDown.property("value");
             globalApplicationState.yData = value;
-            // and update graphs
             globalApplicationState.usMap.updateDataType();
+            d3.select("#line-title-text").text(dataMaping[value]);
+        });
 
-            // update graph title
-            d3.select("#line-title-text")
-                .text(dataMaping[value])
-        })
+    dropDown.selectAll("option").remove();
 
     // bind data and set value and text functions
     var options = dropDown.selectAll("myOptions")
@@ -248,7 +232,8 @@ function addDropDownBox() {
             return d;
         });
 
-    // init global with value to match slection
-    globalApplicationState.yData = d3.select("#data-select").property("value");
+    dropDown.property("value", globalApplicationState.yData);
+    globalApplicationState.yData = dropDown.property("value");
+    d3.select("#line-title-text").text(dataMaping[globalApplicationState.yData]);
 
 }
