@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>US-Bees</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Trent Hansen · Bee Data Story</title>
 
     <link rel="stylesheet" href="styles.css" />
 
@@ -16,13 +17,97 @@
 </head>
 
 <body>
-    <div class="header">
-        <h1>US Inter-State Bee Data Comparison Tool</h1>
-        <p>Name: Trent Hansen; E-Mail: 711trent@gmail.com</p>
-    </div>
+    <header class="hero">
+        <div class="hero__eyebrow">Data storytelling · Apiary health</div>
+        <h1>Trent Hansen</h1>
+        <p class="hero__tagline">Data visualization engineer translating national bee colony metrics into crisp, decision-ready narratives.</p>
+        <div class="hero__cta">
+            <a class="btn" href="mailto:711trent@gmail.com">Email Trent</a>
+            <a class="btn btn--ghost" href="#viz">Explore the dashboard</a>
+        </div>
+        <div class="hero__summary">
+            <div>
+                <p class="summary__label">Focus</p>
+                <p class="summary__value">Agricultural analytics · Sustainability</p>
+            </div>
+            <div>
+                <p class="summary__label">Toolchain</p>
+                <p class="summary__value">D3 · Python ETL · GitHub Pages</p>
+            </div>
+            <div>
+                <p class="summary__label">Reach</p>
+                <p class="summary__value">50-state coverage · 2015–2023</p>
+            </div>
+        </div>
+    </header>
 
-    <div id="content">
-    </div>
+    <main>
+        <section class="resume-grid" id="about">
+            <article class="card">
+                <p class="eyebrow">Mission</p>
+                <h2>Make bee health actionable</h2>
+                <p>Designed a full-stack data pipeline and storytelling layer so policy teams can quickly compare colony stressors, losses, and recovery bets in any U.S. state.</p>
+            </article>
+            <article class="card">
+                <p class="eyebrow">Strengths</p>
+                <ul>
+                    <li>Translate messy USDA datasets into clean, analysis-ready models.</li>
+                    <li>Prototype performant, interactive D3 visuals without frameworks.</li>
+                    <li>Ship continuously via GitHub Actions + Pages.</li>
+                </ul>
+            </article>
+            <article class="card">
+                <p class="eyebrow">Highlights</p>
+                <ul>
+                    <li>Automated pipeline covering 350K+ colony observations.</li>
+                    <li>Responsive web app with map + time-series storytelling.</li>
+                    <li>Data dictionary + onboarding docs for fast handoff.</li>
+                </ul>
+            </article>
+        </section>
+
+        <section class="resume-grid resume-grid--two">
+            <article class="card">
+                <p class="eyebrow">Experience</p>
+                <h3>Data Visualization Engineer · Personal Lab</h3>
+                <p>Built reusable modules for choropleth + multi-series charting, state selection, and metric toggles. Balanced technical depth with a narrative-first layout suited for portfolio reviews.</p>
+            </article>
+            <article class="card">
+                <p class="eyebrow">Impact Snapshot</p>
+                <div class="impact-grid">
+                    <span>4</span>
+                    <p>Interactive layers (map, gradient legend, chart, overlay)</p>
+                    <span>12</span>
+                    <p>Key health metrics surfaced for each state</p>
+                    <span>∞</span>
+                    <p>Comparisons available through multi-state selection</p>
+                </div>
+            </article>
+        </section>
+
+        <section class="viz-section" id="viz">
+            <div class="viz-section__header">
+                <div>
+                    <p class="eyebrow">Interactive insight lab</p>
+                    <h2>Bee Colony Health Explorer</h2>
+                    <p>Select any metric to see a national heat map and trends over time. Click states to compare trajectories, then clear to reset.</p>
+                </div>
+                <div class="control-stack" id="control-bar">
+                    <label for="data-select">Metric</label>
+                    <select id="data-select" aria-label="Bee health metric">
+                        <option selected disabled>Loading metrics…</option>
+                    </select>
+                    <button id="clear-button" type="button">Clear Selected States</button>
+                </div>
+            </div>
+            <div id="content" class="viz-stage"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Built by Trent Hansen · <a href="mailto:711trent@gmail.com">711trent@gmail.com</a></p>
+    </footer>
+
     <script src="js/script.js"></script>
 </body>
 
