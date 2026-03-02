@@ -76,31 +76,5 @@ jobs:
             echo '```' >> $GITHUB_STEP_SUMMARY
           fi
 
-  deploy-website:
-    name: Deploy Website to GitHub Pages
-    runs-on: ubuntu-latest
-    needs: update-data
-    if: github.ref == 'refs/heads/main'
-    
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: main
-      
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-      
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          path: '.'
-      
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v3
+# Site deployment is handled by .github/workflows/pages.yml which triggers
+# automatically on any push to main — including the data commit above.
