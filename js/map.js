@@ -100,9 +100,8 @@ class MapVis {
         });
 
         //------------------
-        //create color scale
-
-        this.color = d3.scaleSequential(d3.interpolateRgb("#ffffff", "#ff0000"));
+        // create color scale — dark bg to amber
+        this.color = d3.scaleSequential(d3.interpolateRgb("#1e273a", "#c9a84c"));
 
         // 0 to max average
         this.color.domain([0, this.maxAverage]);
@@ -165,8 +164,8 @@ class MapVis {
             //map the data value to a color or grey if there is no data
             .style("fill", d => {
                 return d.properties.data === -1
-                    ? "#030303" // Grey for -1
-                    : this.color(d.properties.data); // Default color mapping
+                    ? "#2e3135" // dark grey for missing data
+                    : this.color(d.properties.data);
             })
             // click event listener
             .on("click", (event, d) => this.updateSelectedStates(this.globalApplicationState, d));
@@ -196,8 +195,8 @@ class MapVis {
         // color checkpoints
         linearGradient.selectAll("stop")
             .data([
-                { offset: "0%", color: "#ffffff" }, // white
-                { offset: "100%", color: "#ff0000" } // red
+                { offset: "0%",   color: "#1e273a" },
+                { offset: "100%", color: "#c9a84c" }
             ])
             .enter().append("stop")
             .attr("offset", d => d.offset)
@@ -209,9 +208,9 @@ class MapVis {
             .attr("y", this.globalApplicationState.svgHeight)
             .attr("width", globalApplicationState.gradientWidth)
             .attr("height", globalApplicationState.gradientWidth / 4)
-            .attr("stroke", "black") // outline color
-            .attr("stroke-width", 1) // outline width
-            .style("fill", "url(#gradient)");  // use the gradient fill
+            .attr("stroke", "#444c56")
+            .attr("stroke-width", 1)
+            .style("fill", "url(#gradient)");
 
         let fontSize = Math.floor((this.height) * .02 + 6);
 
@@ -221,7 +220,7 @@ class MapVis {
             .attr("y", this.globalApplicationState.svgHeight - fontSize/3)
             .text("0")
             .attr("font-size", fontSize + "px")
-            .attr("fill", "black")
+            .attr("fill", "#8b949e")
             .attr("text-anchor", "middle")
 
         svg.append("text")
@@ -231,8 +230,7 @@ class MapVis {
             .attr("text-anchor", "middle")
             .text(Math.floor(this.maxAverage).toLocaleString())
             .attr("font-size", fontSize + "px")
-            .attr("fill", "black");
-
+            .attr("fill", "#8b949e");
     }
 
 

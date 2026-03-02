@@ -187,59 +187,50 @@ class LineChart {
     * create axes and scales
     */
     drawAxes() {
+        const TICK_COLOR = "#8b949e";
+        const LINE_COLOR = "#444c56";
 
         //----------------------------
-        //draw y axis
-
-        // get axis-containing object
+        // y axis
         let yg = d3.select("#y-axis");
 
-
-        // generate scale
         this.yscale = d3.scaleLinear()
             .domain([0, d3.max(this.ungrouped, d => d[this.yType])])
             .range([this.height, 0])
             .nice();
 
-        //create axis
-        let yAxis = d3.axisLeft();
-
-        // assign the scale to the axis
-        yAxis.scale(this.yscale);
-
+        let yAxis = d3.axisLeft().scale(this.yscale);
         yg.call(yAxis);
 
-
-
+        // theme the y axis
+        yg.selectAll(".tick text").attr("fill", TICK_COLOR);
+        yg.selectAll(".tick line").attr("stroke", LINE_COLOR);
+        yg.select(".domain").attr("stroke", LINE_COLOR);
 
         //----------------------------
-        //draw x axis
-
-        // get axis-containing object
+        // x axis
         let xg = d3.select("#x-axis");
 
-        // get transform function
         let parseDate = d3.timeParse("%Y-%m-%d");
-
-        // generate scale
         this.xscale = d3.scaleTime()
             .domain(d3.extent(this.ungrouped, d => parseDate(d.date)))
             .range([0, this.width])
             .nice();
 
-        //create axis
         let xAxis = d3.axisBottom()
-            .tickFormat(d3.timeFormat("%Y-%m-%d"));
+            .tickFormat(d3.timeFormat("%Y-%m-%d"))
+            .scale(this.xscale);
 
-        // assign the scale to the axis
-        xAxis.scale(this.xscale);
-
-        // draw axis
         xg.call(xAxis)
-            .selectAll("text") // get text labels
-            .attr("transform", "rotate(-20)") // rotate labels 
-            .style("text-anchor", "end") // end of text is attached to point
-            .attr("font-size", Math.floor((this.height) * .02 + 5) + "px")  // scale font size
+            .selectAll("text")
+            .attr("transform", "rotate(-20)")
+            .style("text-anchor", "end")
+            .attr("font-size", Math.floor((this.height) * .02 + 5) + "px")
+            .attr("fill", TICK_COLOR);
+
+        // theme the x axis lines
+        xg.selectAll(".tick line").attr("stroke", LINE_COLOR);
+        xg.select(".domain").attr("stroke", LINE_COLOR);
     }
 
     /**

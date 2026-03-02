@@ -85,106 +85,59 @@ loadData().then((loadedData) => {
 });
 
 function addFittedSVGs() {
-    //--------------------------
-    // do screen size math
+    // ── size math ─────────────────────────────────────────────
     const MAP_WIDTH_TO_HEIGHT_RATIO = 1.75;
-    const GRADIENT_WIDTH_RATIO = .1;
-    const PADDING_PERCENT = .07; //percent of screen space on top and bottom and 2x on the left
+    const GRADIENT_WIDTH_RATIO      = 0.1;
+    const PADDING_PERCENT           = 0.07;
 
-    const TITLE_HEIGHT_RATIO = .25*.4;
+    const screenWidth = window.innerWidth;
 
-    // get screen width
-    let screenWidth = window.innerWidth * .9;
-
-    // make each piece proportionally sized
-    //                                PADDING_PERCENT of one display
-    globalApplicationState.padding = Math.floor((screenWidth / 2) * PADDING_PERCENT);
-    // half of width minus padding
-    globalApplicationState.svgWidth = Math.floor(screenWidth / 2 - globalApplicationState.padding * 2);
-
-    // width divided by ratio
-    globalApplicationState.svgHeight = Math.floor(globalApplicationState.svgWidth / MAP_WIDTH_TO_HEIGHT_RATIO);
-    // width * gradient ratio
+    globalApplicationState.padding       = Math.floor((screenWidth / 2) * PADDING_PERCENT);
+    globalApplicationState.svgWidth      = Math.floor(screenWidth / 2 - globalApplicationState.padding * 2);
+    globalApplicationState.svgHeight     = Math.floor(globalApplicationState.svgWidth / MAP_WIDTH_TO_HEIGHT_RATIO);
     globalApplicationState.gradientWidth = Math.floor(globalApplicationState.svgWidth * GRADIENT_WIDTH_RATIO);
 
-    //---------------------------------
-    //add html content
+    const svgW  = globalApplicationState.svgWidth  + globalApplicationState.padding * 2;
+    const svgH  = globalApplicationState.svgHeight + globalApplicationState.padding * 2 + globalApplicationState.padding;
 
-    const width = globalApplicationState.svgWidth + globalApplicationState.padding * 2;
-    const height = globalApplicationState.svgHeight + globalApplicationState.padding * 2;
-
-    // Select the content div
     const contentDiv = d3.select("#content");
 
-    //--------------------
-    // add titles
+    // ── Map column ────────────────────────────────────────────
+    const mapCol = contentDiv.append("div").attr("class", "viz-col");
 
-    // Append the map title SVG element
-    const mapTitleSVG = contentDiv.append("svg")
-        .attr("id", "map-title")
-        .attr("width", width)
-        .attr("height", height * TITLE_HEIGHT_RATIO);
+    mapCol.append("div")
+        .attr("class", "viz-col__title")
+        .text("National Average by State");
 
-    //add text
-    mapTitleSVG.append("text")
-        .text("Average Value For States")
-        .attr("x", (width) / 2)
-        .attr("y", (height * TITLE_HEIGHT_RATIO) / 2)
-        .attr("text-anchor", "middle")
-        .attr("font-size", Math.floor((height * TITLE_HEIGHT_RATIO) *.85) + "px")
-        .attr("fill", "black")
-        .attr("x", (width) / 2) // position is in the middle cause we center the text
-        .attr("y", (height * TITLE_HEIGHT_RATIO) / (6/5)) // dividing by 10/9 starts the text 90% down
-
-
-    // Append the line-chart title SVG element
-    const lineChartTitleSVG = contentDiv.append("svg")
-        .attr("id", "line-chart-title")
-        .attr("width", width + 10)
-        .attr("height", height * TITLE_HEIGHT_RATIO)
-
-    //add text
-    lineChartTitleSVG.append("text")
-        .attr("id", "line-title-text")
-        .text("State Data Over Time")
-        .attr("text-anchor", "middle")
-        .attr("font-size", Math.floor((height * TITLE_HEIGHT_RATIO) * .85)+"px") 
-        .attr("fill", "black")
-        .attr("x", (width + 10) / 2) // position is in the middle cause we center the text
-        .attr("y", (height * TITLE_HEIGHT_RATIO)/(6/5)) // dividing by 10/9 starts the text 90% down
-
-    //--------------------
-    // add map and graph svgs and subsequent groups
-
-    // Append the map SVG element
-    const mapSVG = contentDiv.append("svg")
+    const mapSVG = mapCol.append("svg")
         .attr("id", "map")
-        .attr("width", width)
-        .attr("height", height + globalApplicationState.padding);
+        .attr("width", svgW)
+        .attr("height", svgH);
 
-    // Add g elements inside map SVG
     mapSVG.append("g").attr("id", "country-outline");
     mapSVG.append("g").attr("id", "states");
     mapSVG.append("g").attr("id", "legend");
 
-    // Append the line-chart SVG element
-    const lineChartSVG = contentDiv.append("svg")
-        .attr("id", "line-chart")
-        .attr("width", width + 10)
-        .attr("height", height + globalApplicationState.padding);
+    // ── Line-chart column ─────────────────────────────────────
+    const chartCol = contentDiv.append("div").attr("class", "viz-col");
 
-    // Add g elements inside line-chart SVG
+    chartCol.append("div")
+        .attr("class", "viz-col__title")
+        .append("span")
+        .attr("id", "line-title-text")
+        .text("State Data Over Time");
+
+    const lineChartSVG = chartCol.append("svg")
+        .attr("id", "line-chart")
+        .attr("width", svgW + 10)
+        .attr("height", svgH);
+
     lineChartSVG.append("g").attr("id", "x-axis");
     lineChartSVG.append("g").attr("id", "y-axis");
     lineChartSVG.append("g").attr("id", "lines");
+    lineChartSVG.append("g").attr("id", "overlay").append("line");
 
-    // Add the overlay group with a line inside
-    lineChartSVG.append("g")
-        .attr("id", "overlay")
-        .append("line");
-
-    //--------------------
-    // initialize selectors with existing markup
+    // ── init controls ─────────────────────────────────────────
     addDropDownBox();
 }
 
