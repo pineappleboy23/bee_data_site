@@ -9,6 +9,7 @@
 
 # Python
 __pycache__/
+*/__pycache__/
 *.py[cod]
 *$py.class
 *.so
@@ -17,6 +18,12 @@ env/
 venv/
 ENV/
 .venv
+
+# Test / tool caches
+.pytest_cache/
+htmlcov/
+coverage.xml
+.mypy_cache/
 
 # Data Pipeline
 data/raw/**/*.csv

@@ -41,13 +41,7 @@ jobs:
       - name: Process USDA data
         run: |
           python pipeline/process_usda_data.py
-        continue-on-error: true
-      
-      - name: Transform data (fallback)
-        if: failure()
-        run: |
-          python pipeline/transform.py
-      
+
       - name: Run data validation
         run: |
           pip install pytest

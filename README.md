@@ -1,8 +1,7 @@
 # 🐝 Bee Colony Data Visualization
 
-![CI/CD Pipeline](https://github.com/YOUR_USERNAME/bee_data_site/workflows/CI%20Pipeline/badge.svg)
-![Deploy Status](https://github.com/YOUR_USERNAME/bee_data_site/workflows/Deploy%20to%20GitHub%20Pages/badge.svg)
-[![codecov](https://codecov.io/gh/YOUR_USERNAME/bee_data_site/branch/main/graph/badge.svg)](https://codecov.io/gh/YOUR_USERNAME/bee_data_site)
+![CI](https://github.com/pineappleboy23/bee_data_site/actions/workflows/ci.yml/badge.svg)
+![Deploy](https://github.com/pineappleboy23/bee_data_site/actions/workflows/pages.yml/badge.svg)
 
 An interactive data visualization tool for tracking honey bee colony health across the United States. Features automated data pipelines, comprehensive testing, and CI/CD workflows for quarterly USDA data updates.
 
