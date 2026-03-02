@@ -1,306 +1,118 @@
-# 🐝 Bee Colony Data Visualization
+# U.S. Bee Colony Health Explorer
 
 ![CI](https://github.com/pineappleboy23/bee_data_site/actions/workflows/ci.yml/badge.svg)
 ![Deploy](https://github.com/pineappleboy23/bee_data_site/actions/workflows/pages.yml/badge.svg)
 
-An interactive data visualization tool for tracking honey bee colony health across the United States. Features automated data pipelines, comprehensive testing, and CI/CD workflows for quarterly USDA data updates.
+**Live site:** https://pineappleboy23.github.io/bee_data_site/
 
-## 🎯 Features
+An end-to-end data project built by Trent Hansen (Data Science, graduating May 2026). Raw USDA survey files are fetched from an API, cleaned, merged, and validated through a Python ETL pipeline, then served as an interactive D3.js dashboard on GitHub Pages. The pipeline runs on a quarterly schedule so the site stays current without manual intervention.
 
-### Data Visualization
-- **Interactive US Map**: State-by-state choropleth visualization of bee colony metrics
-- **Time Series Charts**: Track colony counts and health indicators over time
-- **Dynamic Filtering**: Compare metrics across states and time periods
-- **Responsive Design**: Built with D3.js v7 for smooth interactions
+---
 
-### Data Pipeline
-- **Automated Data Fetching**: USDA API integration
-- **Data Processing**: Handles USDA special notation ((Z), (X), (NA), -)
-- **Data Validation**: Comprehensive quality checks for schema, ranges, and consistency
-- **Quarterly Updates**: Scheduled pipeline runs for new USDA releases
+## What it does
 
-### CI/CD Infrastructure
-- **Automated Testing**: pytest suite with 15+ validation tests
-- **Multi-Version Testing**: Python 3.9, 3.10, 3.11 compatibility
-- **Code Coverage**: Integrated with Codecov for visibility
-- **Code Quality**: flake8, black, isort, mypy enforcement
-- **Pre-commit Hooks**: Automatic formatting and linting
-- **GitHub Actions**: Automated deployment to GitHub Pages
+The dashboard lets you explore honey bee colony health across all 50 U.S. states from 2015 to the present. Select a metric from the dropdown — colony counts, loss rates, or stressor percentages like Varroa mite impact — and the choropleth map updates immediately. Click any state to add its time-series to the chart on the right; click more states to compare them side by side. Hover the chart to read exact values at any point in time.
 
-## 🏗️ Architecture
+---
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    QUARTERLY SCHEDULE                        │
-│         (Jan 15, Apr 15, Jul 15, Oct 15 @ 2 AM UTC)        │
-└────────────────────────┬────────────────────────────────────┘
-                         │
-                         ▼
-              ┌──────────────────┐
-              │  Fetch USDA Data │  ← fetch_usda_api.py
-              │  (API Method)    │
-              └────────┬─────────┘
-                       │
-                       ▼
-              ┌──────────────────┐
-              │  Process Data    │  ← process_usda_data.py
-              │  (Clean, Merge)  │
-              └────────┬─────────┘
-                       │
-                       ▼
-              ┌──────────────────┐
-              │  Validate Data   │  ← tests/test_data_validation.py
-              │  (Quality Tests) │
-              └────────┬─────────┘
-                       │
-                       ▼
-              ┌──────────────────┐
-              │  Auto-Commit &   │  ← .github/workflows/deploy.yml
-              │  Deploy to Pages │
-              └──────────────────┘
-```
+## ETL Pipeline
 
-## 🚀 Quick Start
+The bulk of the engineering work is in the data pipeline. USDA publishes bee colony surveys as ZIP archives containing multiple CSV tables per release, with each annual or semi-annual release using slightly different column layouts and special notation.
 
-### Prerequisites
-- Python 3.9 or higher
-- pip
-- Git
+**Fetching** (`pipeline/fetch_usda_api.py`)  
+Calls the USDA ESMIS REST API to discover all available releases, downloads each ZIP, and extracts the relevant CSVs into `data/raw/`. New releases are detected automatically — only files not yet present are downloaded.
 
-### Installation
+**Processing and cleaning** (`pipeline/process_usda_data.py`)  
+This is where the heaviest lifting happens:
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/bee_data_site.git
-   cd bee_data_site
-   ```
+- Merges raw CSVs from multiple release directories across years into a single unified dataset, handling the fact that column names and table layouts shift between releases.
+- Translates USDA special notation into usable values:
+  - `(Z)` → `0.25` (reported as "less than half the unit")
+  - `(X)` → `NaN` (not applicable for that state/period)
+  - `(NA)` → `NaN` (data not available)
+  - `-` → `0` (explicit zero)
+- Normalizes column names to consistent snake_case across all years.
+- Produces two clean output files: `bee_data.csv` (colony counts and losses) and `varroa_df.csv` (stressor percentages), which the frontend loads and joins client-side.
 
-2. **Install Python dependencies**
-   ```bash
-   pip install -r pipeline/requirements.txt
-   pip install -r requirements-dev.txt
-   ```
+**Validation** (`tests/test_data_validation.py`)  
+Automated checks run after every pipeline execution:
+- All required columns are present and correctly typed
+- Percentages fall within 0–100
+- Colony counts are non-negative
+- Max colonies >= starting colonies for each row
+- Data covers expected date range
 
-3. **Install pre-commit hooks**
-   ```bash
-   pre-commit install
-   ```
+---
 
-### Running Locally
+## Automation
 
-1. **Fetch and process data**
-   ```bash
-   # Option 1: Use USDA API (Recommended - Fast & Reliable)
-   python pipeline/run_pipeline.py --api
-   
-   # Option 2: Fetch latest 3 releases via API
-   python pipeline/run_pipeline.py --api -n 3
-   
-   # Option 3: Process existing CSV files
-   # (Place CSV or ZIP files in data/raw/ first)
-   python pipeline/run_pipeline.py
-   ```
+Two GitHub Actions workflows keep everything running without manual work:
 
-2. **Run tests**
-   ```bash
-   # Run all tests with coverage
-   pytest tests/ -v --cov=pipeline --cov-report=html
-   
-   # View coverage report
-   # Open htmlcov/index.html in browser
-   ```
+`deploy.yml` — runs on the 15th of January, April, July, and October. Fetches new USDA data, processes it, runs validation tests, commits the updated CSVs, and pushes to `main`. Can also be triggered manually from the Actions tab.
 
-3. **View the site**
-   ```bash
-   # Serve locally (requires Python http.server or similar)
-   python -m http.server 8000
-   # Open http://localhost:8000 in browser
-   ```
+`pages.yml` — deploys the site to GitHub Pages on every push to `main`. Because the data pipeline commits to `main`, a quarterly data update automatically triggers a fresh deploy.
 
-## 🧪 Testing
+`ci.yml` — runs the full test suite across Python 3.9, 3.10, and 3.11 on every push and pull request.
 
-### Test Suite Overview
-- **Data Validation**: Schema checks, range validation, consistency tests
-- **Pipeline Tests**: Unit tests for data processing functions
-- **Edge Cases**: Special USDA notation handling, missing data, invalid inputs
+---
 
-### Running Tests
-
-```bash
-# Run all tests
-pytest tests/ -v
-
-# Run with coverage report
-pytest tests/ -v --cov=pipeline --cov-report=term-missing
-
-# Run specific test file
-pytest tests/test_data_validation.py -v
-
-# Run tests matching pattern
-pytest tests/ -k "test_schema" -v
-```
-
-## 📊 Data Processing
-
-### USDA Special Notation Handling
-The pipeline correctly processes USDA NASS special notation:
-- `(Z)` → 0.25 (less than half the reporting unit)
-- `(X)` → NaN (not applicable)
-- `(NA)` → NaN (not available)
-- `-` → 0 (zero value)
-
-### Data Sources
-- **Primary**: USDA NASS Honey Bee Surveys (Quarterly)
-- **API**: https://esmis.nal.usda.gov/api/v1/release/findByPubId/1585
-- **Web**: https://usda.library.cornell.edu/concern/publications/rn301137d
-- **Update Frequency**: Quarterly (January, April, July, October)
-- **Format**: ZIP files containing CSV data tables
-
-### Data Validation
-Automated quality checks ensure:
-- ✓ Schema compliance (required columns present)
-- ✓ Range validation (percentages 0-100%, colonies ≥ 0)
-- ✓ Consistency checks (max_colonies ≥ starting_colonies)
-- ✓ Date recency (data not older than 2 years)
-- ✓ Stressor percentage logic (sum validation)
-
-## 🔄 CI/CD Workflows
-
-### Continuous Integration (CI)
-**Trigger**: Push/PR to `main` or `develop`
-
-Pipeline steps:
-1. **Test Matrix**: Python 3.9, 3.10, 3.11
-2. **Install Dependencies**: Cached pip packages
-3. **Lint**: flake8 (E9, F63, F7, F82 error codes)
-4. **Format Check**: black and isort validation
-5. **Test**: pytest with coverage reporting
-6. **Coverage**: Upload to Codecov
-
-### Continuous Deployment (CD)
-**Trigger**: Quarterly schedule (15th of Jan/Apr/Jul/Oct @ 2 AM UTC)
-
-Pipeline steps:
-1. **Fetch Data**: Call USDA API
-2. **Process Data**: Clean and validate
-3. **Run Tests**: Ensure data quality
-4. **Commit**: Auto-commit processed data
-5. **Deploy**: Push to GitHub Pages
-
-## 🛠️ Development
-
-### Code Quality Tools
-
-```bash
-# Format code with black
-black pipeline/ tests/
-
-# Sort imports with isort
-isort pipeline/ tests/
-
-# Lint with flake8
-flake8 pipeline/ tests/
-
-# Type check with mypy
-mypy pipeline/
-```
-
-### Pre-commit Hooks
-Pre-commit hooks automatically run before each commit:
-- ✓ Trailing whitespace removal
-- ✓ YAML/TOML syntax validation
-- ✓ black formatting
-- ✓ isort import sorting
-- ✓ flake8 linting
-- ✓ bandit security checks
-
-```bash
-# Run hooks manually
-pre-commit run --all-files
-```
-
-### Project Structure
+## Project structure
 
 ```
 bee_data_site/
 ├── pipeline/
-│   ├── fetch.py              # Basic data fetcher
-│   ├── fetch_usda_api.py     # USDA API fetcher (recommended)
-│   ├── transform.py          # Basic data cleaning
-│   ├── process_usda_data.py  # Advanced USDA processing
-│   ├── requirements.txt      # Pipeline dependencies
-│   └── README.md            # Pipeline documentation
+│   ├── fetch_usda_api.py     # USDA API fetcher
+│   ├── process_usda_data.py  # Cleaning, merging, notation handling
+│   ├── clean_data.py         # Shared cleaning utilities
+│   ├── run_pipeline.py       # Entry point
+│   └── requirements.txt
 ├── data/
-│   ├── raw/                 # Downloaded raw data
-│   ├── processed/           # Cleaned, validated data
-│   └── README.md           # Data documentation
+│   ├── raw/                  # Downloaded source files (gitignored)
+│   └── processed/            # Clean output CSVs committed for the site
 ├── tests/
-│   ├── test_data_validation.py  # Data quality tests
-│   ├── test_pipeline.py         # Pipeline unit tests
-│   └── conftest.py              # Test fixtures
+│   ├── test_data_validation.py
+│   ├── test_pipeline.py
+│   └── conftest.py
 ├── .github/workflows/
-│   ├── ci.yml               # CI pipeline
-│   └── deploy.yml           # CD pipeline
+│   ├── ci.yml
+│   ├── deploy.yml            # Quarterly data pipeline
+│   └── pages.yml             # Site deployment
 ├── js/
-│   ├── script.js            # Main visualization logic
-│   ├── map.js              # US map component
-│   ├── line-chart.js       # Time series component
-│   └── data/               # Map GeoJSON data
-├── index.html              # Main HTML page
-├── styles.css              # Styles
-├── pyproject.toml          # Python tool configuration
-├── requirements-dev.txt    # Development dependencies
-└── .pre-commit-config.yaml # Pre-commit hook config
+│   ├── script.js             # App state and data loading
+│   ├── map.js                # Choropleth map
+│   ├── line-chart.js         # Time-series chart
+│   └── data/us-states.json
+├── index.html
+└── styles.css
 ```
-
-## 📈 Key Metrics
-
-### Visualization Metrics
-- States Tracked: 50 states + DC + US aggregate
-- Time Period: 2015-present
-- Metrics:
-  - Colony counts (starting, max, lost, added)
-  - Loss percentages
-  - Renovation percentages
-  - Stressor impact percentages (Varroa mites, diseases, pesticides, etc.)
-
-### Code Quality Metrics
-- Test Coverage: Target 80%+
-- Linting: All critical flake8 errors enforced
-- Formatting: black + isort compliance
-- Type Safety: mypy validation (gradual typing)
-
-## 🤝 Contributing
-
-### Workflow
-1. Create feature branch from `develop`
-2. Make changes (pre-commit hooks will run automatically)
-3. Run tests: `pytest tests/ -v --cov`
-4. Push and create PR to `develop`
-5. CI pipeline runs automatically
-6. Merge after approval
-
-### Coding Standards
-- **Style**: Black formatting (line length 100)
-- **Imports**: isort with black profile
-- **Linting**: flake8 compliance
-- **Testing**: pytest for all new features
-- **Type Hints**: Encouraged for function signatures
-
-## 📝 License
-
-This project is open source and available under the MIT License.
-
-## 🔗 Links
-
-- **Live Site**: https://YOUR_USERNAME.github.io/bee_data_site/
-- **Data Source**: [USDA NASS Honey Bee Surveys](https://usda.library.cornell.edu/concern/publications/rn301137d)
-- **Issues**: https://github.com/YOUR_USERNAME/bee_data_site/issues
-
-## 📧 Contact
-
-For questions or feedback, please open an issue on GitHub.
 
 ---
 
-**Built with** ❤️ **and** 🐝 **for better bee data accessibility**
+## Running locally
+
+```bash
+# Clone
+git clone https://github.com/pineappleboy23/bee_data_site.git
+cd bee_data_site
+
+# Install pipeline dependencies
+pip install -r pipeline/requirements.txt
+
+# Fetch and process data
+python pipeline/run_pipeline.py --api
+
+# Run tests
+pytest tests/ -v
+
+# Serve the site
+python -m http.server 8000
+# Open http://localhost:8000
+```
+
+---
+
+## Data source
+
+USDA NASS Honey Bee Colonies survey — published quarterly.  
+https://usda.library.cornell.edu/concern/publications/rn301137d  
+API endpoint: https://esmis.nal.usda.gov/api/v1/release/findByPubId/1585
