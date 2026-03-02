@@ -52,7 +52,7 @@ const globalApplicationState = {
     gradientWidth: null,
     padding: null,
 
-    yData: "Starting_Colonies"
+    yData: "Varroa_mites"
 };
 
 //******* SET UP FITTED HTML ITEMS *******

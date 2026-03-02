@@ -171,7 +171,8 @@ class MapVis {
             // click event listener
             .on("click", (event, d) => this.updateSelectedStates(this.globalApplicationState, d));
 
-
+        // raise selected states so their outlines always render on top
+        d3.select("#states").selectAll(".state.selected").raise();
 
         this.drawScale();
         //whenever we redraw the map we need to redraw the line chart too

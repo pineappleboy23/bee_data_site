@@ -303,7 +303,7 @@ a:hover { color: var(--accent-hi); }
 }
 
 #states > .state.selected {
-    stroke: var(--accent-hi);
+    stroke: #ffffff;
     stroke-width: 2px;
 }
 
