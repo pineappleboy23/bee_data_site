@@ -1,13 +1,34 @@
 // ******* DATA LOADING *******
 async function loadData() {
-    // map data source
-    // https://github.com/topojson/us-atlas?tab=readme-ov-file
-    // Using locally processed data from automated pipeline
-    const beeData = await d3.csv('data/processed/bee_data.csv');
+    const [beeData, varroaData, mapData] = await Promise.all([
+        d3.csv('data/processed/bee_data.csv'),
+        d3.csv('data/processed/varroa_df.csv'),
+        d3.json('js/data/us-states.json')
+    ]);
 
-    // All data processing is now done in the backend pipeline
-    // CSV columns are already properly formatted with underscores
-    const mapData = await d3.json('js/data/us-states.json');
+    // Strip the timestamp from date strings so d3.timeParse("%Y-%m-%d") works.
+    // CSV dates come in as "2015-01-01 00:00:00"; slice to "2015-01-01".
+    const cleanDate = d => d.date ? d.date.slice(0, 10) : d.date;
+
+    beeData.forEach(d => { d.date = cleanDate(d); });
+    varroaData.forEach(d => { d.date = cleanDate(d); });
+
+    // Build a lookup for varroa data keyed by "State|date"
+    const varroaLookup = {};
+    varroaData.forEach(d => {
+        varroaLookup[d.State + '|' + d.date] = d;
+    });
+
+    // Merge varroa columns into each bee_data row
+    beeData.forEach(d => {
+        const v = varroaLookup[d.State + '|' + d.date];
+        if (v) {
+            d.Varroa_mites             = v.Varroa_mites;
+            d.Other_pests_and_parasites = v.Other_pests_and_parasites;
+            d.Diseases                 = v.Diseases;
+            d.Pesticides               = v.Pesticides;
+        }
+    });
 
     return { beeData, mapData };
 }
@@ -153,7 +174,7 @@ function addDropDownBox() {
         Other_pests_and_parasites: 'Affected By Other Pests and Parasites %',
         Max_Colonies: 'Max Colonies',
         Lost_colonies: 'Lost Colonies',
-        Percent_Lost: 'Lost Colonies %',
+        Percent_lost: 'Lost Colonies %',
         Added_colonies: 'Added Colonies',
         //Renovated_colonies: 'Renovated Colonies',
         //Percent_renovated: 'Percent Renovated %'
