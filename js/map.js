@@ -51,8 +51,10 @@ class MapVis {
         this.globalApplicationState.beeData.forEach((entry) => {
 
             let state = entry.State;
-            //                       data type is gotteh through global object
-            let dataOfType = entry[this.globalApplicationState.yData];
+            let dataOfType = +entry[this.globalApplicationState.yData];
+
+            // skip rows where this metric is missing or not a number
+            if (isNaN(dataOfType) || dataOfType === null || dataOfType === undefined) return;
 
             if (dataOfType > this.max) {
                 this.max = dataOfType;
@@ -62,7 +64,6 @@ class MapVis {
             if (!averageValueByState[state]) {
                 averageValueByState[state] = { sum: 0, count: 0, name: state };
             }
-
 
             // add to data
             averageValueByState[state].sum += dataOfType;
@@ -202,35 +203,39 @@ class MapVis {
             .attr("offset", d => d.offset)
             .attr("stop-color", d => d.color);
 
+        const pad    = this.globalApplicationState.padding;
+        const barY   = this.globalApplicationState.svgHeight + pad + 8;  // sit below the map
+        const barH   = 12;
+        const barW   = this.globalApplicationState.gradientWidth;
+        let fontSize = 11;
+
         // add rect to hold gradient
         svg.append("rect")
-            .attr("x", this.globalApplicationState.padding)
-            .attr("y", this.globalApplicationState.svgHeight)
-            .attr("width", globalApplicationState.gradientWidth)
-            .attr("height", globalApplicationState.gradientWidth / 4)
+            .attr("x", pad)
+            .attr("y", barY)
+            .attr("width", barW)
+            .attr("height", barH)
             .attr("stroke", "#444c56")
             .attr("stroke-width", 1)
             .style("fill", "url(#gradient)");
 
-        let fontSize = Math.floor((this.height) * .02 + 6);
-
         svg.append("text")
-            .attr("x", this.globalApplicationState.padding)
             .attr("id", "left")
-            .attr("y", this.globalApplicationState.svgHeight - fontSize/3)
+            .attr("x", pad)
+            .attr("y", barY + barH + fontSize + 2)
             .text("0")
             .attr("font-size", fontSize + "px")
             .attr("fill", "#8b949e")
-            .attr("text-anchor", "middle")
+            .attr("text-anchor", "start");
 
         svg.append("text")
-            .attr("x", globalApplicationState.gradientWidth + this.globalApplicationState.padding)
-            .attr("y", this.globalApplicationState.svgHeight - fontSize / 3)
             .attr("id", "right")
-            .attr("text-anchor", "middle")
-            .text(Math.floor(this.maxAverage).toLocaleString())
+            .attr("x", pad + barW)
+            .attr("y", barY + barH + fontSize + 2)
+            .text(Math.round(this.maxAverage).toLocaleString())
             .attr("font-size", fontSize + "px")
-            .attr("fill", "#8b949e");
+            .attr("fill", "#8b949e")
+            .attr("text-anchor", "end");
     }
 
 
