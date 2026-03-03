@@ -102,6 +102,19 @@ def check_strings_in_df(df, strings):
     return all(any(s in cell for cell in flat_set) for s in strings)
 
 
+def clean_column_names(df):
+    """Replace spaces in column names with underscores."""
+    df = df.copy()
+    df.columns = [col.replace(' ', '_') for col in df.columns]
+    return df
+
+
+def remove_unwanted_columns(df, columns_to_remove):
+    """Drop specified columns from DataFrame, ignoring any that don't exist."""
+    cols = [c for c in columns_to_remove if c in df.columns]
+    return df.drop(columns=cols)
+
+
 def classify_dataframe(df):
     """
     Classifies a DataFrame based on keywords:
