@@ -3,10 +3,10 @@ Run the complete data pipeline with flexible options.
 
 Usage:
     python run_pipeline.py                    # Process from existing CSVs (default)
-    python run_pipeline.py --api              # Fetch ALL releases via API, then process (recommended)
-    python run_pipeline.py --api -n 3         # Fetch only last 3 releases via API
-    python run_pipeline.py --full             # Full pipeline with ALL releases (same as --api)
-    
+    python run_pipeline.py --api         # Fetch ALL releases via API, then process (recommended)
+    python run_pipeline.py --api -n 3    # Fetch only last 3 releases via API
+    python run_pipeline.py --full        # Full pipeline with ALL releases (same as --api)
+
 Note: Raw data is never modified, only read. The API automatically fetches
 all available releases to ensure complete historical coverage (2015-present).
 """
@@ -18,8 +18,8 @@ from pathlib import Path
 # Add pipeline directory to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-import fetch_usda_api
-import process_usda_data
+import fetch_usda_api  # noqa: E402
+import process_usda_data  # noqa: E402
 
 
 def run_from_raw():

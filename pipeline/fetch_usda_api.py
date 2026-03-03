@@ -7,7 +7,6 @@ to get direct download links for all bee colony reports.
 
 import io
 import zipfile
-from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -100,7 +99,7 @@ def download_and_extract_zip(url: str, output_dir: Path, release_name: str = "")
             csv_files = [f for f in zf.namelist() if f.lower().endswith(".csv")]
 
             if not csv_files:
-                print(f"  ⚠ No CSV files found in ZIP")
+                print("  ⚠ No CSV files found in ZIP")
                 return []
 
             print(f"  📦 Extracting {len(csv_files)} CSV file(s) to {release_subdir}/...")
@@ -119,7 +118,7 @@ def download_and_extract_zip(url: str, output_dir: Path, release_name: str = "")
         return extracted_files
 
     except zipfile.BadZipFile:
-        print(f"  ✗ Error: Downloaded file is not a valid ZIP")
+        print("  ✗ Error: Downloaded file is not a valid ZIP")
         return []
     except Exception as e:
         print(f"  ✗ Error downloading/extracting: {e}")
@@ -192,7 +191,7 @@ def main(num_releases: int = 1) -> bool:
         zip_url = get_zip_url(release)
 
         if not zip_url:
-            print(f"  ⚠ No ZIP file found for this release")
+            print("  ⚠ No ZIP file found for this release")
             continue
 
         # Download and extract

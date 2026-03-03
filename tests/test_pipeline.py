@@ -7,14 +7,13 @@ Tests the data processing scripts and functions.
 import sys
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 import pytest
 
 # Add pipeline to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "pipeline"))
 
-from process_usda_data import (
+from process_usda_data import (  # noqa: E402
     apply_special_value_replacements,
     clean_column_names,
     convert_specific_columns,
@@ -64,7 +63,7 @@ class TestUSDADataProcessing:
 
         result = convert_specific_columns(df, exclude_columns=["State"])
 
-        # State should remain string (dtype may be 'object' or StringDtype depending on pandas version)
+        # State dtype may be 'object' or StringDtype depending on pandas version
         assert pd.api.types.is_string_dtype(result["State"])
         # Numeric columns should be numeric
         assert pd.api.types.is_numeric_dtype(result["Colonies"])

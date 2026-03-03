@@ -59,12 +59,10 @@ def clean_bee_data(
     )
 
     if varroa_removed > 0:
-        print(
-            f"  Removed {varroa_removed} duplicate varroa rows ({varroa_removed/len(varroa_df)*100:.1f}%)"
-        )
+        pct = varroa_removed / len(varroa_df) * 100
+        print(f"  Removed {varroa_removed} duplicate varroa rows ({pct:.1f}%)")
     if colonies_removed > 0:
-        print(
-            f"  Removed {colonies_removed} duplicate colonies rows ({colonies_removed/len(colonies_df)*100:.1f}%)"
-        )
+        pct = colonies_removed / len(colonies_df) * 100
+        print(f"  Removed {colonies_removed} duplicate colonies rows ({pct:.1f}%)")
 
     return varroa_clean, colonies_clean
